@@ -109,3 +109,23 @@ We then calculate all the possible dot products, and then instead of treating th
 **This allows us to grow the batch size to millions of items and to parallelize this task**
 
 ![sigmoid](images/sigmoid.png) Here z is the dot product of the vectors.
+
+## Why Contrastive Vision Encoder though and not any ordinary Vision Encoder?
+
+We want the embeddings to capture the information about the image and be good representations that can be then contrasted and can be used along with text embeddings.
+
+# Vision Transformer
+
+A transformer model is a sequence to sequnce model, we feed it a sequence of embeddings and then it outputs a sequence of contextualize embeddings.
+
+What we do is we take in an image, split it into patches or group of pixels. We then extract the information form the group of pixels with the help of Convolution and then we Flatten them meaning we loose the positional information and we just concatenate them with each other[we loose the 2dimentionality]. We then add this positional information which is **learned** and not calculated without any sinusoidal functions. We then feed it into the Transformer model which later on contextualises the embeddings through the attention mechanism to a series of embeddings, meaning it will not only capture the information about itself but also of the other patches/embeddings.
+
+> [!NOTE]
+> Text has a Auto regressive relationship meaning we write text from left to right, each word we write depends on what we have written previously and on the other hand Images 
+> dont have a auto regressive relationship, in images the patches depends on all other patches to make the meaning of the particular image.
+
+We use the contextualized embeddings to capture the information about the each patch and how its present in the image, meaning we want each patch to include the information about its position[positional encoding] and also whats surrounding this patch in image by contextualizing them.
+
+This is how sequence to sequence model works with transformer models.
+
+![language-model](images/language-model.PNG)
