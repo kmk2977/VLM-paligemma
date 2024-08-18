@@ -129,3 +129,39 @@ We use the contextualized embeddings to capture the information about the each p
 This is how sequence to sequence model works with transformer models.
 
 ![language-model](images/language-model.PNG)
+
+# Normalization
+
+There are a list of linear layers and they are defined by two parameters **input-features** and **output-features** and one another term named **bias** which is a constant which is added to the product of features and **weigths** which are the values which determine the strength of the connections and they influence one neurons output on one neurons input. Usually we have a batch of items and each item is made up of features.
+
+What we do is say we have one batch here, we multiply the input vector x with the weight and add some bias to it if its present and then it generates one output feature.
+
+![normalization](images/normalization.png)
+
+But there is one big problem here **Covariate Shift**
+
+## Covariate Shift
+
+When you have a input vector that changes from one batch to another in magnitude then the output of the layer will also change in magnitude depending on what is the incomming .
+
+**Why is it bad?**
+
+Big change in input of a layer -> Big change in outout of layer -> Big change in loss -> Big change in gradient -> Big change in the weights of the network -> therefore slow learning.
+
+Solution-1 :-> Use **Batch Normalization**
+
+We have a batch of items as input. for ex. we have a image classification task, we have as input a list of images and then features[dimensions that represent the particular image].
+
+In Batch Normalization we calculate the statistics for each dimensions of each item[we calculate mean and varaince] and then we normalize each item by substracting mean and then dividing it by standard deviation. This will make each dimension of each item be distributed according to a gausian with mean 0 and a variance of 1.
+
+![batchnorm](images/batchnorm.png)
+
+**Problem with Batch Normalization**
+
+The problem with batch norm is that each statistics [mean and the varaince] are calculated along the batch dimension. The statistics depends on what other items are in the batch and therefore to get good results we must use a **big batch size**.
+
+Solution 2 :-> **Layer Normalization**
+
+We calculate the statistics along the item dimension instead of the batch dimension, but insted of the mean and standard deviation coming from the first dimention of each item it comes from the average of all the dimensions of the each item independently thus making the training more stable and even we are not forced to use the large batch size.
+
+![layernorm](images/layernorm-1.png) ![layernorm](images/layernorm-2.png) Here H is the no. of hidden units in a layer
