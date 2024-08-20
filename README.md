@@ -164,4 +164,41 @@ Solution 2 :-> **Layer Normalization**
 
 We calculate the statistics along the item dimension instead of the batch dimension, but insted of the mean and standard deviation coming from the first dimention of each item it comes from the average of all the dimensions of the each item independently thus making the training more stable and even we are not forced to use the large batch size.
 
-![layernorm](images/layernorm-1.png) ![layernorm](images/layernorm-2.png) Here H is the no. of hidden units in a layer
+![layernorm](images/layernorm-1.png) ![layernorm](images/layernorm-2.png) Here H is the no. of hidden units in a layer.
+
+## Multi-Head Attention
+
+It is a way of contextualizing stuff, you start with a seqeuence of patches. Say we have 4 patches, each of these patches is represented by a single vector of 1024 dimensions. Each of these patch is being extracted from a group of pixels from the image and it represents information about the image.
+
+With multi head attention we contextualize these patches meaning the output of this is a tensor of the same size as of the input. Each of the patches in the output does not just catches information about itself but also about the other patches aswell.
+
+![vision](images/vision.png)
+
+>[!NOTE]
+> The above explainantion is for Vision transformer, for Language model we have am input sequence which is a sequence of tokens each representing one single word. Each token is representated as an embedding. We want to contextualize each token with all the tokens that come before it.
+>
+>![text](images/text.png)
+>
+> In language models we basically train on the next token prediction, we start with some tokens which are the prompts and ask the model what would be the next token till the predicition task is finished and we receive the complete output.
+>
+> Predict next tokens given the past tokens and the transformer allows us to do that in parallel with training . We have uncontextualized inputs and a series of contextualized output, in such a way that each tokens captures information about itself and also about the previous token.
+>
+> The self attention model will take the prompt as input and generate the output in parallel using the multi head attention.
+>
+> We also need some labels to train the model.
+
+
+**Step-1** Convert the input sequence X into Query, Key, Values
+
+We convert them using 3 transformations W <sub>q </sup> , W <sub>k </sub> , W <sub>v </sub> , which is a matrix multiplication. 
+
+![step-1](images/step1.png)
+
+here sequence is the no. of tokens or patches, hidden_size represents the size of this embedding vector
+
+the transformations are of size (1024,8,128) -> the second 1024 is divided into 8 groups of 128. The second matrix has 1024 rows with 8 invidual vectors and its made up of 128 dimensions. Therefore the resulting output is also split into multiple sub groups 4 rows, 8 vectors and 128 dimensions
+
+>[!NOTE]
+> Multi head attntion is a way to relate tokens with each other, we dont want the tokens to relate by watching the full embedding of each token, we want to do it with the 8 individual heads such as each heads works with a smaller part of embedding of each token. 
+
+01:40:23
