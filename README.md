@@ -198,7 +198,66 @@ here sequence is the no. of tokens or patches, hidden_size represents the size o
 
 the transformations are of size (1024,8,128) -> the second 1024 is divided into 8 groups of 128. The second matrix has 1024 rows with 8 invidual vectors and its made up of 128 dimensions. Therefore the resulting output is also split into multiple sub groups 4 rows, 8 vectors and 128 dimensions
 
+![step-1-1](images/step-1-1.png)
+
 >[!NOTE]
 > Multi head attntion is a way to relate tokens with each other, we dont want the tokens to relate by watching the full embedding of each token, we want to do it with the 8 individual heads such as each heads works with a smaller part of embedding of each token. 
 
-01:40:23
+![scaled-vs-multi](images/scaled%20vs%20multi.png)
+
+We generally calculate the dot product over all the embedding of token, and we do this with token 1, 2 etc. therefore theres only one way to relate between tokens.
+
+By spliting each token into smaller groups[heads] we releate the tokens differently. This multi head attention is based on dot products, this occurs in parallel. 
+
+
+**Step-2** Treat Each Head Independently!
+
+We want to compute the multi head attention in parallel, i.e each head should be able to visualize the entire sequence but smaller part of the embedding of each token.
+
+We exchange the sequence dimension with the head dimension
+
+![step2](images/step2.png)
+
+WHY Multi-head attention?
+1. we want to parallelize the computation
+2. each head should learn to relate tokens or patches differently 
+
+
+**Step-3** Calculate the attention for each head in parallel
+
+![step3](images/qhead.png) ![step-3](images/transpose.png)
+
+for each head is made up of a sequence of tokens, and each token is not the full embedding of the token but its the first 128(differs). we do a transpose here in which each of these row vectors become column vectors. we then multiply it and we get a matrix which represents the dot product of one token with another token i.e the relationship between the tokens the bigger the dot product the more intense is the relationship.
+
+we have the sqrt of the model as denominator bcz we want the magnitude to be constant
+
+>[!NOTE]
+>In landuage model we add a attention mask, we donot want the first token to be related to other tokens as theres no previous tokens, similartly the token next to it wont be related to the next tokens but the previous ones and so on. The relations that u dont want can be replace with -∞. In the next step u have to apply the softmax which will convert each od these numbers into probability score. we apply softmax row by row.
+>![languagemodel](images/languagemodel.png)
+
+![normalllm](images/normal.png)
+
+![languagemodel-1](images/languagemodel-1.png)
+
+the prbabilities will range from 0-1 and we want the sumation of each rows to be 1
+
+![llmask](images/llmmask.png)
+
+we will add the mask[the ones we dont want] before applying the softmax, it will replace all the interactions with 0 which we dont want. the resultant matrix is known as the **attention weight**[tells us how intense is the relation between two tokens]. 
+
+>[!WARNING]
+>This process will continue till the number of heads you have. Each of them is calculated in parallel
+
+**Step-4** Multiply by the Value sequence
+
+![step4](images/step4.png)
+
+the attention weight matrix and the value sequence matrix will be multiplied. so the first row of the attention matrix will be multiplied with all the individual columns of the value sequence matrix. as we can see in the first row of attention matrix we only have value filled in the first key the rest will be 0 that means in the value sequence only the first token will contribute, this will continue row by row 
+
+![step4-1](images/step4-1.png)
+
+therefore generating contextualized embeddings part by part.
+
+![concat](images/concat.png)
+
+We merge all these heads by concatenating them.
