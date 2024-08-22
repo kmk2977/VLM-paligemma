@@ -291,4 +291,8 @@ if we dont multiply with the W<sub>o</sub> matrix theres no mixing between the r
 
 
 
+## Weight Tying
 
+![transformer](images/transformer.png)
+
+Weight Tying is a technique where you reuse the parameters of one layer into another. With weight tying it shares the parameters of one layer with another for example in the Decoder section of transformer the Output embedding layer and the Lienar layer do opposite tasks. Becasue of this technique you reduce the total number of parameters as you are sharing these parameters 
