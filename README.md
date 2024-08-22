@@ -261,3 +261,34 @@ therefore generating contextualized embeddings part by part.
 ![concat](images/concat.png)
 
 We merge all these heads by concatenating them.
+
+**Step-5** Transpose Back
+
+We have to swap the head dimension and the sequence dimensions
+
+![step5](images/step-5.png)
+
+**Step-6** Concatenate All The Heads
+
+Given that each head is computing the contextualized embeddings using a part of each token we can concatenate all the result of all the heads back together. Meaning all the heads in the first token will be concatenated.
+
+![step6](images/step-6.png)
+
+**Step-7** Multiply by W<sub>o</sub>
+
+W<sub>o</sub> matrix is a (embedding_size,embedding_size) parameter.
+
+so the first row of the concatenated matrix will be multiplied by the first column of the W<sub>o</sub> matrix, meaning 1024 dimensions of the first head, 1024 dimensions of the second head will all participate in the same dot product of the first column of the W<sub>o</sub> matrix giving up one single number in the resultant matrix so there has been a mixing of the results.
+
+if we dont multiply with the W<sub>o</sub> matrix theres no mixing between the result of each head which happen independently in parallel.
+
+**We dont want the each token to be a contextualized version of multiple sub tokens each calculated independently from each other by the multi head attention, we want that to happen in parallel and mix the result of this multi head attention and we do that by multiplying W<sub>o</sub> matrix.**
+
+>[!NOTE]
+>**WHY MULTIPLY BY W<sub>o</sub> MATRIX?**
+>
+>If we dont multiply by W<sub>o</sub>, each group of 128 dimensions will be independent from each other, as they are the result of the concatenation of independent heads. Multiplying by W<sub>o</sub> gives the chance to each head to **"mix"** with other heads.
+
+
+
+
