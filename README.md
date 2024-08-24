@@ -296,3 +296,30 @@ if we dont multiply with the W<sub>o</sub> matrix theres no mixing between the r
 ![transformer](images/transformer.png)
 
 Weight Tying is a technique where you reuse the parameters of one layer into another. With weight tying it shares the parameters of one layer with another for example in the Decoder section of transformer the Output embedding layer and the Lienar layer do opposite tasks. Becasue of this technique you reduce the total number of parameters as you are sharing these parameters 
+
+
+
+
+# KV-Cache
+
+**The problem**
+
+The transformer model is a sequence to sequence prediciton model. Given a prompt the transformer modle has to generate embeddings[contextualized -> capture information about itself and other tokens also], on the basis of that it should predict the next word[lable].
+
+![transformer](images/transformermodel.png)
+
+During inference the user only gives one token, we feed this into the transformer network, it will generate one contextualized embedding. We then project this embedding into **logits**, these logits tell us what score is assigned by the model to each token giving information about liklihood which token is the next one i.e a probablility score and then you apply **softmax** which all sum up to 1, we select the one with the highest value.
+
+![inference](images/inference.png)
+
+We then feed in the new token embedding into model resulting into two contexutalized embedding, we select the best contextual embedding and perform the same step.
+
+![inference-2](images/inference2.png)
+
+We keep doing this till the entire sentence is generated.
+
+**Problem** -> In this sequence to sequence model we generate a lot of contextualized embeddings and are only using one embedding which is better at each inference step.
+
+
+## KV-Cache
+
