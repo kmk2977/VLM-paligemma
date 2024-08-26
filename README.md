@@ -323,3 +323,10 @@ We keep doing this till the entire sentence is generated.
 
 ## KV-Cache
 
+We start with one token, model will convert it into an embedding and feed it into transformer model. This single token will be converted into query, key, value. We have self attention[QxKxV matrix]. Then we project into logits apply softmax and then we move to the next token.
+
+Whenever we pass a token into the model, we cache the key and value sequence into a buffer called K-V cache. Initially this is empty, after the second pass both the bufferes are populated.
+
+We take the previously generated token and take it as input to the model and follow the process again. We append this new token into the K-V cache and use this buffer to perform the self-attention.
+
+![kvcache](images/kvcache.png)
