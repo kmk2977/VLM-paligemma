@@ -330,3 +330,16 @@ Whenever we pass a token into the model, we cache the key and value sequence int
 We take the previously generated token and take it as input to the model and follow the process again. We append this new token into the K-V cache and use this buffer to perform the self-attention.
 
 ![kvcache](images/kvcache.png)
+
+With this we can get rid of the unwanted tokens, but we dont want to add tokens one by one as it will be slow. Generally the prompt will not be short it will be long.
+
+![prefill](images/pre-filling.png)
+
+**Pre-Fill**
+Say we have a prompt with two words, we create two embeddings and then pass it into the transformer model. Initially the kv cache is empty, the q,k,v sequence will have 2 tokens each, we put the k,v tokens in the resp buffers. We then calculate the self attention resulting into a 2x2 matrix, 2 output embeddings -> 2 logits embeddings -> 2 softmax and we will use only the last one as we dont want to predict the second word but the next one.
+
+![prefixmask](images/attnmask.png)
+
+Prompt in paligemma is made up of image tokens, user prompt. The prompt is not causal because the textual prompt is generally very short and it describes what task the visual lang model has to perform.
+
+3:39
