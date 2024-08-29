@@ -342,4 +342,13 @@ Say we have a prompt with two words, we create two embeddings and then pass it i
 
 Prompt in paligemma is made up of image tokens, user prompt. The prompt is not causal because the textual prompt is generally very short and it describes what task the visual lang model has to perform.
 
-3:39
+During prefilling we would have text prompt and the image tokens, we dont have to generate any mask here because each text prompt can watch even future tokens of the text prompt. The prompt is not causal as we are not going to generate it, all we do is pass it to the model. So the input[**Prefix**] is not causal and the output[**Suffix/Target**] is causal.
+
+![suffixmask](images/sufflixmask.png)
+
+In suffix the first output needs to attend all the previous keys, so as per the above fig 3 image tokens and 4 text tokens, the next output needs to attend all the 3 image tokens, 4 text tokens plus the last generated token, and it continues till all the tokens are predicted.
+
+
+## Gemma Architecture
+
+![gemma](images/gemma.png)
