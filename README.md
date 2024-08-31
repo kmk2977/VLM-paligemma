@@ -352,3 +352,22 @@ In suffix the first output needs to attend all the previous keys, so as per the 
 ## Gemma Architecture
 
 ![gemma](images/gemma.png)
+
+## RMSNorm[RootMeanSquare Norm]
+
+Each item of the batch is normalized in such a way that they are coming out of a distribution[gaussion distribution] with a center of 0 and the variance 1.
+
+LayerNorm was successfull because of **re-scaling** invariance instead of the **re-centering** invariance.
+
+>[!NOTE]
+>We use Normalization to reduce the internal co-varaite shift.
+
+The model does not need to see the values centered arround 0, it just needs to see the values mostly surrounded on whatever mean they are centered upon.
+
+RMSNorm is more advantageous as instead of calculating two statistics mean and variance, we only need to calculate one **root mean square**.
+
+![rms](images/RMSNorm.png)
+
+We take each item in this vector, we square it up, we sum them up, we then calculate the mean(divded by n), square root that gives us the RMS<sub>(a)</sub>. We then take each of the items divide it by RMS<sub>(a)</sub> and multiply it by g<sub>i</sub> which is a learnable parameter Gamma **which is 1 for each feature**.
+
+![rmsgrid](images/rmsgrid.png)
