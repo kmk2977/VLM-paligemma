@@ -371,3 +371,68 @@ RMSNorm is more advantageous as instead of calculating two statistics mean and v
 We take each item in this vector, we square it up, we sum them up, we then calculate the mean(divded by n), square root that gives us the RMS<sub>(a)</sub>. We then take each of the items divide it by RMS<sub>(a)</sub> and multiply it by g<sub>i</sub> which is a learnable parameter Gamma **which is 1 for each feature**.
 
 ![rmsgrid](images/rmsgrid.png)
+
+
+
+During the normal Multi-Head Attention, each token is divided into multiple groups of dimensions known as heads.
+Lets say we have 1024 dimensions and we divide them in 8 heads, therefore each head will manage 128 dimensions of this token.
+
+We will have a dot product with the Query and Key values, so dot product of the first query head with first key head, then the second key head and the third key head[will repeat till the no. of keys you have]. Then we move on to the second Query head and repeat the same till all the Query heads are covered.
+
+![llm](images/llm.PNG)
+
+Theres a **problem** with Multi-Head attention though.
+
+-> The problem is not with the number of number of computation we do[bottleneck] but the number of data transfered in the GPU.
+
+![gpu](images/gpu.PNG)
+
+The GPU architecture consists of a HighBandwithMemory(~GB) then the LocalMemory(~MB) then multiple cores which all work in parallel. During matrix multiplciation in a GPU, the kernel that manages the multiplciation **CUDA-kernel**. Matrix to be multiplied is in HighBandwithMemory, we will copy the first part of the matrix from HBM to the LocalMemory and each core work with a part of this matrix to compute the multiplication in parallel.
+
+During MultiHeadAttention the first head will copy be copied to the LocalMemory and then it will be accessed by the cores in GPU, this happens for every head in the query.
+
+The bottleneck here is how much time it takes to copy the memory from the HighBandwithMemory to LocalMemory, although the gpu has faster Core's but its not capable to copy stuff faster.
+
+So how to reduce the data trasnfers?
+
+![gpu-reuse](images/gpu-reuse.PNG)
+
+-> Use less heads for the keys. as per the above fig. the first core will copy the first head  of the query from HBM to LM and also the 128 dimensions of each tokens in the Keys, it will perform the computation, meanwhile the second core will copy the 128 dimensions of head 2 in the query from HBM to LM but they do not need to copy the next 128 dimensions of each keys. They can reuse/share the keys that had been earlier loaded into the LocalMemory. As per scenarios you can share 1 key head between 2 query heads it deffers.
+
+>[!NOTE]
+>Thats why in the GemmaAttention class we have less parameters in W<sub>k</sub> and W<sub>v</sub> to compress these tokens into smaller tokens.
+
+>[!WARNING]
+>The MultiQueryAttention reduces the quality of the model but its acceptable.
+
+![attention](images/attention.PNG)
+
+Grouped-Quey cache is a middle man between Multihead and Multiquery it provides better performance by reducing the quantity of data transfer, it also reduces the size of KV-Cache[as the tokens are compressed so the total amount of memory recquired for kv_cache also reduces].
+
+**kv_cache** is a big bottleneck in the new huge language models but we still use it as we have to store each single token in each of the layer which goes very faster if there are lot of tokens[requirements].
+
+
+
+
+### repeat_kv method from gemma.ipynb
+
+We have projection W<sub>k</sub> and W<sub>v</sub> of the token that results into a smaller token, this gives us a benefit from the kv-cache.
+
+![repeat-kv](images/repeat_kv.PNG)
+
+But to compute attention each query head needs to share the head with other query head when working with the keys.
+
+![remove-groupquery](images/remove-group-query.PNG)
+
+Because we are working with the naive implementation of the attention it does not really actually benefit from this optimization, so we repeat the missing heads so that each query has its own key head, this is bcz we are not creating a custom CUDA kernel for the computation of the attention and we repeat it such as the Group-Query attention never happened. 
+
+## Rotary Positional Embedding
+
+![transformer](images/transformer.png)
+
+In the traditional models, we have our tokens which indicate the position of the token in the vocabulary we convert them into embeddings in the embedding layer and add some other vectors to this embeddings that encode the positions informations of each token and we use positional encoding for that purpose.  
+
+>[!NOTE]
+>In the original transformers paper they introduced sinusoidal positional encodings also known as **absolute-positional** encodings because they encode the absolute position inside each token.
+
+Now a days the **Rotary Positional Encodings** are used, they are in the family of relative positional encodings.
