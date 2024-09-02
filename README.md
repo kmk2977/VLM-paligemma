@@ -435,4 +435,64 @@ In the traditional models, we have our tokens which indicate the position of the
 >[!NOTE]
 >In the original transformers paper they introduced sinusoidal positional encodings also known as **absolute-positional** encodings because they encode the absolute position inside each token.
 
-Now a days the **Rotary Positional Encodings** are used, they are in the family of relative positional encodings.
+Now a days the **Rotary Positional Encodings** are used, they are in the family of relative positional encodings. The idea behind Positional Encoddings is that we do not add them directly to the embedding of each token so that each token encodes the information of its position but they modify the attention mechanism in such a way that the attention mechanism takes into consideration the position of the the tokens to relate them differently based on the position.
+
+The multihead attention uses the dot product to relate the tokens to each other. As per the paper, We have to find an ecoding of the embedding vectors of tokens such that when we do the dot product for the token f<sub>q</sub>, f<sub>k</sub> query and keys respectively and encodes the positonal information in x<sub>m</sub> for query and x<sub>n</sub> such that when we do the dot product the output of this will only depend on the embedding of 1st token [x<sub>m</sub>], embedding of 2nd token [x<sub>n</sub>] and the relative distance between them.
+
+![formulation](images/formulation.png)
+
+### A 2D case
+
+embedding vector made up of only 2 dimensions.
+
+We create a rotation matrix[sin and cos matrix], we are rotating this vector by some angle mθ. This will encode the information of the position based on the position m such that when we do the dot product of two vectors this dot product is guaranteed to be a fucntion of the embedding of the first vector, embedding of the second vector and the relative distance that was encoded into them.
+
+![rpe](images/rpe.png)
+
+
+### General Case
+
+for a d dimensional vector we have this rotation matrix which is a sparse matrix mostly made up of 0's, but here we would do many unnecessary computations as most of the elements are 0's
+
+![rpe-general](images/rpe-general.png)
+
+![theta](images/params.png)
+
+There is a better way to calucalte it. If you want to encode the position information inside of the embedding, you need to take the embedding[d-dimensional vector] multiply it element wise[each element] by another matrix which has the cosine where the argument of cosine is the multiple of the θ multiplied by the position of the token that we want to encode in this token [m] + dimensions of the vector rotated and with changed signs multiplied element wise with sin of the same arguments.
+
+Rotary Positional Embedding has a decaying effect based on the distance between 2 tokens, i.e the dot product is converted into a score[softmax] which tells us how intense the relationship is[the bigger the dot product the more the token will contribute to the output].
+
+The dot product will be high when two tokens are close and as they move the dot product will decay.
+
+![decay](images/decay.png)
+
+Each 2 dimensions are being rotated by the same angle, we have a token made up of many dimensions so each pair of dimensions is getting rotated like a 2d vector that is a multiple of the base angle with respect to the position encoding. 
+
+
+>[!NOTE]
+>
+>![alternate-implementation](images/alternate-implementation.png)
+>
+>In the code implementation instead of writing mθ<sub>1</sub>,mθ<sub>1</sub>,mθ<sub>2</sub>,mθ<sub>2</sub> we write mθ<sub>1</sub>,mθ<sub>2</sub>,mθ<sub>3</sub> and repeat them. So when for example the weights of llamma are converted to huggingface they permuted the projection[query and key] which is the embedding of the token and they do it permute again therefore countering the effect of the first permute.
+
+
+# Top-P Sampling
+
+**WAY-1**
+
+Logits after you apply softmax corresponds to a distribution. Logits is a vector wehere the number of dimensions = vocabulary size and it indicates what the model thinks the next token should be. The softmax converts each of this numbers into a modality score(sum upto 1) and we take the highest to predict which token comes next.
+
+**WAY-2**
+
+![top-p](images/top-p.png)
+
+There is a list of numbers one for each position in the vocabulary, we can do sampling which means we can sort these numbers that we get in decreasing order and then we take the top ones that sum up to a probability score. We then rearrange the numbers again so that they sum up to 1 after applying softmax and then we sample again from this distribution.
+
+
+# Temperature
+
+When we apply the temperature we are basically we are making the difference between them a lil bit smaller, therefore we are introducing some noise. With temperature we are making it more likely to choose more diverse tokens as we are reducing the gaps between the probablity scores of the tokens.
+
+
+>[!NOTE]
+>In the end download the model from hugging face and run it
