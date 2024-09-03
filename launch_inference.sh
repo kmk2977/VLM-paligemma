@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MODEL_PATH="paligemma-weights/paligemma-3b-pt-224"
+MODEL_PATH="paligemma-3b-pt-224"
 PROMPT="this building is "
 IMAGE_FILE_PATH="test_images/b93a1975e9ca4aeea7fc861ef8e88abb.jpeg"
 MAX_TOKENS_TO_GENERATE="100"
