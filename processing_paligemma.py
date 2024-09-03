@@ -19,7 +19,9 @@ def resize(image: Image, size: Tuple[int, int], resample: Image.Resampling = Non
     resized_image = image.resize((width, height), resample=resample, reducing_gap=reducing_gap)
     return resized_image
 
-def rescale(image: np.ndarry, scale: float, dtype: np.dtype = np.float32) -> np.ndarray:
+def rescale(
+    image: np.ndarray, scale: float, dtype: np.dtype = np.float32
+) -> np.ndarray:
     rescaled_image = image * scale
     rescaled_image = rescaled_image.astype(dtype)
     return rescaled_image
@@ -31,7 +33,7 @@ def normalize(image: np.ndarray, mean: Union[float, Iterable[float]], std: Union
     return image
 
 def process_images(images: List[Image.Image], size: Dict[str, int] = None,
-    resample: Image.Resampling = None, rescale_factor: floar = None,
+    resample: Image.Resampling = None, rescale_factor: float = None,
     image_mean: Optional[Union[float, List[float]]] = None,
     image_std: Optional[Union[float, List[float]]] = None) -> List[np.ndarray]:
     height, width = size[0], size[1]
