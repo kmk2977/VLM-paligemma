@@ -147,11 +147,11 @@ class GemmaRotaryEmbedding(nn.Module):
             sin = emb.sin()
         return cos.to(dtype=x.dtype), sin.to(dtype=x.dtype)
 
-class rotate_half(x):
-    #build the [-x2, x1, -x4, x3, ...] tensor for the sin part of the positional encoding
-    x1 = x[..., : x.shape[-1] // 2]#takes first half of the last dimension
-    x2 = x[..., x.shape[-1] // 2 :]#takes second half of the last dimension
-    return torch.cat((-x2,x1), dim=-1)
+def rotate_half(x):
+    # Build the [-x2, x1, -x4, x3, ...] tensor for the sin part of the positional encoding.
+    x1 = x[..., : x.shape[-1] // 2] # Takes the first half of the last dimension
+    x2 = x[..., x.shape[-1] // 2 :] # Takes the second half of the last dimension
+    return torch.cat((-x2, x1), dim=-1)
 
 def apply_rotary_pos_emb(q, k, cos, sin, unsqueeze_dim=1):
     cos = cos.unsqueeze(unsqueeze_dim)#add head dim
@@ -186,7 +186,7 @@ class GemmaAttention(nn.Module):
         #wk: [1024, 2 * 128] = [1024, 256]
         #wv: [1024, 2 * 128] = [1024, 256]
         #so for every 4 heads of the query we have 1 head for the key
-        self.q_proj = nn.Linear(self.hidden_size, self.num_heads * se;f.head_dim, bias = config.attention_bias)
+        self.q_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias = config.attention_bias)
         self.k_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias = config.attention_bias)
         self.v_proj = nn.Linear(self.hidden_size, self.num_attention_heads * self.head_dim, bias = config.attention_bias)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=config.attention_bias)
@@ -240,7 +240,7 @@ class GemmaAttention(nn.Module):
         #multiply by [batch_size, num_heads_q, seq_len_q, seq_len_kv] * [batch_size, num_heads_kv, seq_len_kv, head_dim] -> [batch_sizem num_heads_q, seq_len_q, head_dim]
         attn_output = torch.matmul(attn_weights, value_states)
 
-        if attn_output,size() != (bsz, self.num_heads, q_len, self.head_dim):
+        if attn_output.size() != (bsz, self.num_heads, q_len, self.head_dim):
             raise ValueError(
                 f"'attn_output' should be of size {(bsz, self.num_heads, q_len, self.head_dim)}, but is"
                 f" {attn_output.size()}"

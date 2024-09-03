@@ -92,7 +92,8 @@ class SiglipAttention(nn.Module):
 
         if attn_weights.size() != (batch_size, self.num_heads, seq_len, seq_len):
             raise ValueError(
-                f"Attention weights should be of size {(batch_size, self.num_heads, seq_len, seq_len)}, but is f" {attn_weights.size()}""
+                f"Attention weights should be of size {(batch_size, self.num_heads, seq_len, seq_len)}, but is"
+                f" {attn_weights.size()}"
             )
         
         #apply the softmax row_wise . attn_weights: [batch_size, num_heads, num_patches, num_patches]

@@ -1,5 +1,6 @@
-from typing import Dict, List, optional, Union, Tuple, Iterable
-import numpy as num_patchesfrom PIL import Image
+from typing import Dict, List, Optional, Union, Tuple, Iterable
+import numpy as np
+from PIL import Image
 import torch
 
 IMAGENET_STANDARD_MEAN = [0.5, 0.5, 0.5]
@@ -19,7 +20,8 @@ def resize(image: Image, size: Tuple[int, int], resample: Image.Resampling = Non
     return resized_image
 
 def rescale(image: np.ndarry, scale: float, dtype: np.dtype = np.float32) -> np.ndarray:
-    rescaled_image = image * scalerescaled_image = rescaled_image.astype(dtype)
+    rescaled_image = image * scale
+    rescaled_image = rescaled_image.astype(dtype)
     return rescaled_image
 
 def normalize(image: np.ndarray, mean: Union[float, Iterable[float]], std: Union[float, Iterable[float]]) -> np.ndarray:
@@ -48,7 +50,7 @@ class PaliGemmaProcessor:
     #place holder tokens that will be replaced with the embeddings extracted by the vision encoder
     IMAGE_TOKEN = "<image>"
     
-    def __init__(self, tokenizer, num_image_tokens: int, image-size: int):
+    def __init__(self, tokenizer, num_image_tokens: int, image_size: int):
         super().__init__()
 
         self.image_seq_length = num_image_tokens
