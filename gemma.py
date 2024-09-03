@@ -375,7 +375,7 @@ class PaliGemmaMultiModalProjector(nn.Module):
         hidden_states = self.linear(image_features)
         return hidden_states
 
-class PaliGemmaForConditionGeneration(nn.Module):
+class PaliGemmaForConditionalGeneration(nn.Module):
     def __init__(self, config: PaliGemmaConfig):
         super().__init__()
         self.config = config
