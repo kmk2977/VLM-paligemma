@@ -1,3 +1,7 @@
+Notes for the Vision Language Model implementation by Umar Jamil. You can go directly to the video if you want to watch the video version posted by the original author **Umar Jamil**.
+
+[![video](https://img.youtube.com/vi/vAmKB7iPkWw/0.jpg)](https://www.youtube.com/watch?v=vAmKB7iPkWw)
+
 ## Contrastive Vision Learning
 The Contrastive Vision Encoder takes in a image and converts into a series of embeddings, so there will be one for each of the block of pixels[grid] in the given image. This embedding is a vector of a fixed size which will be concatinated with the tokens embeddings.
 
